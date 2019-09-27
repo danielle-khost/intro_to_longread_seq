@@ -1,0 +1,16 @@
+DATA
+PE = pe 600 90 /n/scratchlfs/informatics/dkhost/SRR6702604_1.fastq.gz /n/scratchlfs/informatics/dkhost/SRR6702604_2.fastq.gz
+NANOPORE = /n/scratchlfs/informatics/dkhost/diso1_a2_pass.fastq.gz
+END
+
+PARAMETERS
+GRAPH_KMER_SIZE = auto
+USE_LINKING_MATES = 0
+USE_GRID = 1
+GRID_ENGINE = SLURM
+GRID_QUEUE = general
+GRID_BATCH_SIZE = 110000
+NUM_THREADS = 16
+JF_SIZE = 1800000000
+SOAP_ASSEMBLY = 0
+END 
