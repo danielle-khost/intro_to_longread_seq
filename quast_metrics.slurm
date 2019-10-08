@@ -9,12 +9,6 @@
 
 module load python
 
-~/shasta-Linux-0.1.0 --input ../diso1_a2_pass.fasta
+source activate assembly_eval
 
-
---MinHash.maxBucketSize 5
---MarkerGraph.minCoverage 5
---MarkerGraph.maxCoverage 100
---MarkerGraph.lowCoverageThreshold 0
---MarkerGraph.highCoverageThreshold 128
---MarkerGraph.edgeMarkerSkipThreshold 50
+quast.py -t 8  --eukaryote --large /scratch/dkhost/tetra_shasta/ShastaRun/Assembly.fasta -r /scratch/lmcai/20_tetrastigma_denovo_assembly/canu/tetrastigma.contigs.fasta
