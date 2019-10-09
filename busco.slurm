@@ -11,4 +11,4 @@ module load python
 
 source activate assembly_eval
 
-run_BUSCO.py -f -n 12 -m geno -i /n/scratchlfs/informatics/dkhost/tetra_shasta/Assembly.fasta -o busco_tetra_shasta -l /n/scratchlfs/informatics/dkhost/embryophyta_odb9/
+run_BUSCO.py -f -c 12 -m geno -i /n/scratchlfs/informatics/dkhost/tetra_shasta/Assembly.fasta -o busco_tetra_shasta -l /n/scratchlfs/informatics/dkhost/embryophyta_odb9/
