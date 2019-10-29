@@ -1,0 +1,10 @@
+﻿Assembly,Assembly size,N50,L50,# contigs,BUSCO
+miniasm pilon x2,3.1 Gb,495 kb,1545,9908,86.10%
+Canu,2.44 Gb,433 kb,1334,11550,67.90%
+wtdbg2,2.31 Gb,335 kb,1589,25626,54.90%
+shasta,934 Mb,131 kb,2049,16781,48.00%
+shasta (low cov),987 Mb,68.2 kb,4205,23251,41.30%
+shasta (v low cov),3.72 Gb,26.9 kb,48221,174944,4.30%
+Merged (mini+canu),2.64 Gb,602 kb,979,11074,76.10%
+Merged + racon,2.68 Gb,613 kb,980,10862,79.30%
+Merged + racon + pilon,,,,,

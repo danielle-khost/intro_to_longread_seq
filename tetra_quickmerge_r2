@@ -1,0 +1,19 @@
+source activate longread_toolkit
+PATH=/n/home04/dkhost/quickmerge:/n/home04/dkhost/quickmerge/MUMmer3.23:$PATH
+
+prefix="tetra_merge_v2"
+
+ref="/scratch/dkhost/tetra.m500.pilon3.fasta"
+query="/scratch/dkhost/tetra_merge/merged_tetra_canu_vs_miniasm_qm.racon.fasta"
+
+opt_l="613000" #set value for -l argument
+#-l: controls length cutoff for anchor contigs. N50 is rule of thumb
+#-ml: minimum alignment length for merging
+options="-hco 5.0 -c 1.5 -l $opt_l -ml 20000"
+
+~/quickmerge/MUMmer3.23/nucmer -l 100 -prefix $prefix $ref $query
+echo "FINISHED NUCMER"
+~/quickmerge/MUMmer3.23/delta-filter -i 90 -l 10000 -r -q $prefix.delta > $prefix.rq.delta
+echo "FINISHED FILTER"
+quickmerge -d tetra_merge_v2.rq.delta -q /scratch/dkhost/tetra_merge/merged_tetra_canu_vs_miniasm_qm.racon.fasta -r /scratch/dkhost/tetra.m500.pilon3.fasta -hco 5.0 -c 1.5 -l 613000 -ml 20000 -p $prefix
+echo "FINISHED QUICKMERGE"
