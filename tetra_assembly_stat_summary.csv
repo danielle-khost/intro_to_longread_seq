@@ -8,4 +8,4 @@ shasta (v low cov),3.72 Gb,26.9 kb,48221,174944,4.30%
 Merged (miniv2+canu),2.64 Gb,602 kb,979,11074,76.10%
 Merged + racon,2.68 Gb,613 kb,980,10862,79.30%
 Merged v2 (miniv3+merged) + racon,2.80 Gb,736 Kb,855,10496,79.10%
-Merged v2 (miniv3+merged) + racon + pilon,,,,,
+Merged v2 (miniv3+merged) + racon + pilon,DNF,,,,
