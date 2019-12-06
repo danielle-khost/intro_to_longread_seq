@@ -1,0 +1,8 @@
+﻿,N50,Size,# contigs,Largest contig,BUSCO complete,Time to run
+D. mel miniasm,7.90Mb,135.3Mb,264,24.9Mb,0.50%,~1 hr
+D. mel miniasm + canu corr,DNF: read names dup?,,,,,
+D. mel wtdbg2,11.8Mb,135.8Mb,532,19.3Mb,43%,2 hrs
+D. mel wtdbg2 + canu corr,4.89Mb,127.4Mb,270,18.8Mb,59.50%,3 hrs
+D. mel shasta,253kb,106.2Mb,1080,1.49Mb,25%,~10 min
+D. mel shasta low cov,running,,,,,
+D. mel Canu,3.85Mb,135.7Mb,278,18.3Mb,62%,34 hrs
