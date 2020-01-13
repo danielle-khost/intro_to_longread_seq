@@ -1,39 +1,4 @@
-# Long-read sequencing primer
-## Introduction
-Despite advances in sequencing technology, second-generation sequencing using short reads (such as Illumina or 454) still faces difficulties in certain areas of the genome such as regions with high repeat content, structural variants (e.g. CNVs), or sequences prone to PCR bias (e.g. high GC content). Recently developed so-called third-generation sequencing techniques attempt to address these shortcomings. The two dominant companies currently pioneering these techniques are Pacific Biosciences (PacBio) and Oxford Nanopore Technologies (ONT), both of which develop long-read, single molecule real-time sequencing. One limitation of these methods is the high error rate in the reads (~15% for Nanopore, ~13-15% for PacBio using latest chemistries), though this has been steadily improving and different methods have been developed to deal with error-prone reads (see below). While the two technologies share some broad stroke similarities, their methods and applications differ.
-
-## How does it work?
-### ONT MinION
-A constant electrical current is run over proteinaceous membrane with tiny pores in it, creating an ion current. High molecular weight DNA is added to the membrane and the strands pass thru the pores, disrupting the current in a different manner depending on which bases are moving through the pore. Changes in the current are translated into nucleotide sequence in the base-calling step. Recently ONT released the MinION sequencer, which is small enough to be plugged into a standard USB port, and retails for ~$1000 USD.
-
-#### Reads and library prep  
-Double-stranded DNA is unzipped by a motor protein and a single strand is passed through the pore, producing a “1D” read with ~85% read accuracy in latest chemistries. Recently ONT has developed 1D2 reads: both the template strand and its reverse strand are sequenced one after the other without being physically ligated to each other, which they claim increases read accuracy to ~97%, though not all molecules can be sequenced in this manner.
-•	MinKNOW software produces one file per DNA molecule in FAST5 format
-•	Read length NG50 values range from 1-100kb. Ultra-long reads > 1Mb have also been reported
-
-#### Base-calling  
-Translates raw electrical signal of bases passing through a pore into nucleotide sequence. With current chemistries (R9.4), ~5 bases are passing through at a given time, leading to a large number of possible combinations of bases, coupled with inherently noisy signal.
--	Modern base-callers using trained neural networks
--	Choice of base-caller can have large effect on read accuracy (Wick 2019, Rang 2018)
--	Training base-caller on data similar to your organism of interest can improve accuracy (Wick 2019)
--	Current base-callers:
--	Developed by ONT:
--	Albacore: general purpose base-caller, available to ONT customers. Improved accuracy by adding transducer and reading raw electrical signal directly.
--	Guppy: faster version of Albacore, currently under active development. Has alternate models for base-calling, and can be trained with custom models.
--	Scrappie and Flappie: open-source base-callers. Flappie being actively developed.
--	3rd party:
--	Chiron
-
-### PacBio
-PacBio sequencing is slightly more developed than ONT, with earliest chemistries being introduced around 2009. Film with tiny cavities ten of nanometers in volume (“zero mode waveguides”, ZMGs) is affixed to glass plate. Each ZMW has a DNA polymerase anchored to the bottom of it, along with a single circular DNA molecule with insert, adapter and barcodes. A laser shone through the plate excites fluorescent bases incorporated by the polymerase as it synthesizes a new strand. PacBio’s most recent chemistry is called Sequel, with the previous generation called RS II.
-
--	Sequencing starts at the adapter and goes in a loop, potentially reading over the insert twice or more
--	Groups have reported that highly accurate reads (>99%) can be generated from taking consensus of circular subreads (Wenger et al 2019)
--	Risk of a ZMW containing no template (all background) or multiple (intercalated reads), making filtering necessary to remove low-quality reads
--	Read lengths vary from 1-15kb, with reads > 90kb possible
--	Read accuracies around ~86%
-
-
+# Long-read sequencing background
 ## What can I do with it?
 The most common applications of long read sequencing is to be able to directly study regions of the genome that are still problematic for 2nd generation technologies, i.e. highly repetitive regions such as the pericentromeric heterochromatin, multi-copy gene families such as MHC genes, regions of structural variation, or sequences known to be affected by PCR bias. Previously the high cost of 3rd generation long read sequencing limited its application to organisms with small genomes. However, improvements in data output and error rate has allowed accessible sequencing of more complex genomes. Recent examples the kinds of questions you can answer using long reads:
 
@@ -50,15 +15,17 @@ The most common applications of long read sequencing is to be able to directly s
 Despite improvements, error rates of ONT and PacBio sequencing remain too high to assemble the reads straight away, necessitating an error-correction of the reads and/or assembly. One important consideration when designing a long-read sequencing experiment is whether you will be using only long reads for your de novo assembly (self-correction) or whether supplementary Illumina reads will be used as well (hybrid assembly).
 -	If using self-correction (long reads only):
 -	PacBio: to obtain accuracies close to Illumina, need very high coverage (>90X)
--	Nanopore: ~30X coverage is sufficient for self-correction. However, still has accuracy issues and biases in homopolymer regions (see below)
+-	Nanopore: ~30X coverage is the rule of thumb for long read-only assemblies. However, still has accuracy issues and biases in homopolymer regions (see below)
 -	If doing hybrid assembly:
 -	Even low coverage long reads (5-10X) can greatly improve the contiguity of short read assemblies
--	For correcting assemblies using Pilon
+-	For correcting assemblies using Pilon, at least ~60X Illumina coverage is a good rule of thumb
 
 ## What assemblers can I use?
-- *Minimap/miniasm*: Read mapper and assembler, respectively. Specialized for fast assembly of noisy ONT reads, especially in larger genomes. Note: does not attempt to assemble repetitive regions! Also does not perform an initial error correction of reads like other long read assemblers, resulting in lower per-base accuracy.
-- *SMARTdenovo*: Another rapid assembler usable for ONT and PacBio. Like miniasm, it does not perform error-correction, instead doing an all-by-all alignment of raw reads. Consensus polishing tools (e.g. Quiver for PacBio or Nanopolish for ONT) are required for accurate assembly. Can also perform error correction using other assemblers (e.g. Canu), then pass corrected sequences to SMARTdenovo.
-- *Canu*: Assembler specialized for noisy long-read sequences, useable for PacBio or ONT. First finds overlaps between reads using a hashing algorithm (MHAP) for faster alignment, then generates a corrected consensus based on overlaps and performs an assembly using the corrected sequences. Due to the correction step, it is more computationally intensive that miniasm but is still fairly fast.
+There are many to choose from, which can be overwhelming!
+- *wtdbg2*: A *de novo* assembler useable for noisy ONT or PacBio reads. It uses a "fuzzy Brujin graph" approach where the genome is broken up into segments and similar segments are merged and connected, while still allowing mismatches and gaps. It does not perform initial error correction of reads, but claims to achieve "comparable" base accuracy to other assembler while being an order of magnitude faster. It is also possible to perform error correction using other tools (e.g. Canu), then pass corrected sequences to wtdbg2.
+- *Minimap/miniasm*: Read mapper and assembler, respectively. Specialized for fast assembly of noisy ONT reads, especially in larger genomes. Note: does not attempt to assemble repetitive regions! Also, similar to wtdbg2, miniasm does not perform an initial error correction of reads like, resulting in lower per-base accuracy. Can also take error corrected reads similar to wtdbg2.
+- *SMARTdenovo*: Another rapid assembler usable for ONT and PacBio. Like miniasm, it does not perform error-correction, instead doing an all-by-all alignment of raw reads. Consensus polishing tools (e.g. Quiver for PacBio or Nanopolish for ONT) are required for accurate assembly.
+- *Canu*: Assembler specialized for noisy long-read sequences, useable for PacBio or ONT. First finds overlaps between reads using a hashing algorithm (MHAP) for faster alignment, then generates a corrected consensus based on overlaps and performs an assembly using the corrected sequences. Due to the correction step, it is more computationally intensive than assemblers without a read correction step (e.g. wtdbg2 or miniasm), and can be about an order of magnitude slower. However, it does produce higher base accuracy assemblies compare to wtdbg2, miniasm, etc.
 - *Falcon*: PacBio only. Diploid-aware, allowing phasing of genotypes with sufficient coverage. Specialized for larger genomes. Similar to Canu, performs an error correction step where smaller reads are aligned against largest subset of reads to generate corrected consensus reads that are used for assembly. In addition to primary contigs, also produces “haplotigs” in regions of divergent haplotypes.
 - *Shasta*: ONT only, recently developed in response to heavy computational requirements for human ONT assembly. Developed to be fast (human assembly < 1 day) and more resilient to errors in homopolymer regions that ONT has trouble with. Loads every single base into memory all at once, which for large genomes can require a HUGE amount of processing power, e.g. 128 CPUs and ~1950 GB of RAM for a human genome at 60X coverage!!
 - *MaSuRCa*: Useable for PacBio, ONT and Illumina data. Allows hybrid assembly of long reads: combines short Illumina reads together to form super-reads, which are then approximately aligned using k-mers (similar to MHAP algorithm) with long reads to produce long, accurate “mega-reads”. These reads are then used for assembly using a modified Celera assembler (CABOG). MaSuRCa has been used on difficult, repeat-dense genomes such as *A. tauschii*, a plant related to wheat.
@@ -86,8 +53,22 @@ Both PacBio and ONT are very active being developed, and as such the pros and co
 -	High error rate of MinION is fine for SV detection, but if looking at SNPs or indels or haplotype variation, accuracy is still problem
 -	**Take-away: ONT produces longer reads and more data for less money, at the cost of an increased error rate; PacBio is more expensive and produces shorter reads, but has a better accuracy**
 
-## Example pipelines
-Which assembly process you use will depend on your organism and a variety of other factors, and each method has a wide variety of advanced usage. However, here are some basic protocols for assembly ONT reads using example data from *E. coli* to use as a foundation:  
-- *canu_ecoli_assemble.slurm*: performs full Canu pipeline (correction, trimming, assembly) using default parameters. Disables grid usage (useGrid=false), restricting resources to single local machine (e.g. a personal computer or lab server)...this should be fine for small genomes (like bacteria), but larger genomes should use the grid.
-- *canu_ecoli_assemble_grid.slurm*: as above, but will run on the grid (i.e. Odyssey). By default, Canu will auto-detect available resources and will configure itself; however, it does not request explicit time limits or partitions. You can specify these using the gridOptions=" " argument, and can also control resources used by individual steps (e.g. correction, overlapping, etc). **WIP**
-- *miniasm_ecoli_assemble.slurm*: performs overlapping and assembly using minimap2 and miniasm, plus self-correction of the assembly using Racon. This should run quickly, but is error-prone: further correction with Illumina reads, or pre-correction of ONT reads is useful. **WIP**
+## Example assembly: *Drosophila melanogaster*
+Which assembly process you use will depend on your organism and a variety of other factors, and each method has a wide variety of advanced usage. To provide a base-level of comparison, we performed an ONT assembly of *D. melanogaster*, an organism with a well-established reference genome, using several different approaches. The scripts used to generate the assemblies are provided.
+
+Some facts about *D. melanogaster*:
+- Genome size ~140Mb
+- Relatively low repeat density
+- 5 chromosomes (inc. Y), chromosome arms ~24Mb
+- ~30X coverage from a single MinION run
+
+| Assembly | N50	| Size	| # contigs	| Largest contig	| BUSCO complete	| Time to run |
+| --- | --- | --- | --- | --- | --- | --- |
+D. mel miniasm	| 7.90Mb	| 135.3Mb	| 264	| 24.9Mb	| 0.50%	| ~1 hr |					
+D. mel wtdbg2	| 11.8Mb	| 135.8Mb	| 532	| 19.3Mb	| 43%	| 2 hrs |
+D. mel wtdbg2 + canu corr	| 4.89Mb	| 127.4Mb	| 270	| 18.8Mb | 	59.50%	| 3 hrs |
+D. mel shasta	| 253kb	| 106.2Mb	| 1080	| 1.49Mb	| 25%	| ~10 min |
+D. mel shasta low cov	| 404kb	| 125Mb	| 1365	| 1.69Mb	| 23.1%% |	~10 min |
+D. mel Canu	| 3.85Mb	| 135.7Mb	| 278	| 18.3Mb	| 62%	| 34 hrs |
+
+As evident from the above table, there is no clear-cut best assembly method. For example, the Canu assembler produces the highest base accuracies (based on the BUSCO completeness score); however, it takes a day and a half to assemble even a relatively small eukaryotic genome.  

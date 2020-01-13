@@ -1,4 +1,4 @@
-module load python samtools
+module load python samtools bwa
 
 #source activate longread_toolkit
 
